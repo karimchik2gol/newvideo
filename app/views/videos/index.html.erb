@@ -1,0 +1,219 @@
+<% content_for :additional_style do %>
+  <%= stylesheet_link_tag 'datatable' %>
+<% end %>
+<% content_for :additional_script do %>
+  <%= javascript_include_tag 'datatable' %>
+<% end %>
+
+<div class="datas" data-cont="<%= Video.order("views asc").select(:title, :href, :views).to_json %>"></div>
+  <div class="row">
+    <div class="col-lg-12">
+        <div class="card-box">
+            <div class="dropdown pull-right">
+                <a href="#" class="dropdown-toggle card-drop" data-toggle="dropdown"
+                   aria-expanded="false">
+                    <i class="zmdi zmdi-more-vert"></i>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Another action</a></li>
+                    <li><a href="#">Something else here</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#">Separated link</a></li>
+                </ul>
+            </div>
+
+            <h4 class="header-title m-t-0 m-b-30">Combine Statistics</h4>
+
+            <div id="combine-chart">
+                <div id="website-stats" class="flot-chart" style="height: 320px;">
+                </div>
+            </div>
+
+        </div>
+    </div><!-- end col-->
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card-box">
+        <p class="text-muted m-b-15 font-13">
+          <%= link_to 'Parse trends', "/videos/parse_trends", method: "get", class: "btn btn-info waves-effect w-md waves-light m-b-5" %>
+          <%= link_to "Destroy all videos", videos_path, method: "delete", data: { confirm: "Are you sure?" }, class: "btn btn-danger  waves-effect w-md waves-light m-b-5" %>
+        </p>
+        <p class="m-t-20">
+          <%= link_to "All categories", "/videos", class: "m-r-10" %>
+          <% @categories.each do |c| %>
+              <%= link_to c.name, "/videos?category_id=#{c.category_id}", class: "m-r-10" if c %>
+          <% end %>
+          <% if params[:category_id] %>
+            | <%= link_to "Destroy all videos from this category", videos_path(category_id: params[:category_id]), method: "delete", data: { confirm: "Are you sure?" }, class: "m-l-10" %>
+          <% end %>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row videos"><%= render "video_list" %></div>
+</div>
+
+
+<%= javascript_include_tag 'float' %>
+<script>
+  var info = [], permit_to_scroll = true, page = 0;
+
+  $(window).scroll(function() {
+      if(($(window).scrollTop() + $(window).height() >= $(document).height() - 200) && permit_to_scroll) {
+          page++;
+          load_images();
+      }
+  })
+
+  function load_images() {
+     $.ajax({
+            method: "GET",
+            async: false,
+            dataType: "HTML",
+            url: "/videos/newitems",
+            data: { "page": page },
+            success: function(data, textStatus, request) {
+                permit_to_scroll = (request.getResponseHeader('permit_to_scroll') == 'true');
+                $(".videos").append(data);
+            }
+     });
+  }
+
+  function copyToClipboard(text) {
+    window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+  }
+
+  function get_nums(){
+    var arr = [];
+    $.each($(".datas").data("cont"), function(index, value){
+      var cur = $(this)[0];
+      views = cur["views"];
+      info.push({"link": cur["href"], "title": cur["title"]})
+      arr.push([index, Number(views)]);
+    })
+    console.log(arr)
+    return arr;
+  }
+
+  $(document).ready(function() {
+    ! function($) {
+        "use strict";
+
+        var FlotChart = function() {
+          this.$body = $("body")
+          this.$realData = []
+        };
+        //creates plot graph
+        FlotChart.prototype.createPlotGraph = function(selector, data1, labels, colors, borderColor, bgColor) {
+          //shows tooltip
+          $.plot($(selector), [{
+            data : data1,
+            label : labels[0],
+            color : colors[0]
+          }], {
+            series : {
+              lines : {
+                show : true,
+                fill : true,
+                lineWidth : 3,
+                fillColor : {
+                  colors : [{
+                    opacity : 0.4
+                  }, {
+                    opacity : 0.4
+                  }]
+                }
+              },
+              points : {
+                show : false
+              },
+              shadowSize : 0
+            },
+
+            grid : {
+              hoverable : true,
+              clickable : true,
+              borderColor : borderColor,
+              tickColor : "#f9f9f9",
+              borderWidth : 1,
+              labelMargin : 10,
+              backgroundColor : bgColor
+            },
+            legend : {
+              position : "ne",
+              margin : [0, -24],
+              noColumns : 0,
+              labelBoxBorderColor : null,
+              labelFormatter : function(label, series) {
+                // just add some space to labes
+                return '' + label + '&nbsp;&nbsp;';
+              },
+              width : 30,
+              height : 2
+            },
+            yaxis : {
+              tickColor : 'transparent',
+              tickLength: 0,
+              font : {
+                color : '#bdbdbd'
+              }
+            },
+            xaxis : {
+              tickColor : '#transparent',
+              tickLength: 0,
+              font : {
+                color : '#bdbdbd'
+              }
+            },
+            tooltip : true,
+            tooltipOpts : {
+              content : function(label, xval, yval, flotItem){
+                var current = info[xval];
+                return "Views: <b>"+yval+"</b><br/><span>" + current["title"] + "</span><br/><span>"+current["link"]+"</span>"
+              },
+              shifts : {
+                x : -60,
+                y : 25
+              },
+              defaultTheme : false
+            }
+          });
+        },
+        //end plot graph
+        //initializing various charts and components
+        FlotChart.prototype.init = function() {
+          //plot graph data
+          var uploads = get_nums();
+
+          var plabels = ["Info", "Page views"];
+          var pcolors = ['#188ae2', '#10c469'];
+          var borderColor = 'transparent';
+          var bgColor = 'transparent';
+          this.createPlotGraph("#website-stats", uploads, plabels, pcolors, borderColor, bgColor);
+
+          $("#website-stats").bind("plotclick", function (event, pos, item) {
+            if (item) { 
+                i = item["dataIndex"];
+                var link = info[i]["link"];
+                window.open(link, '_blank');
+            }
+          });
+        },
+
+        //init flotchart
+        $.FlotChart = new FlotChart, $.FlotChart.Constructor =
+        FlotChart
+
+      }(window.jQuery),
+
+      //initializing flotchart
+      function($) {
+        "use strict";
+        $.FlotChart.init()
+      }(window.jQuery);
+  })
+</script>

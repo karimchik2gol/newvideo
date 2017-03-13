@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Newvideo</title>
+  <%= csrf_meta_tags %>
+
+  <!-- Styles -->
+  <%= stylesheet_link_tag    'admin' %>
+  <%= yield(:additional_style) if content_for?(:additional_style) %>
+
+   <!-- Scripts -->
+   <%= javascript_include_tag 'admin' %>
+</head>
+<body class="fixed-left">
+	<!-- Begin page -->
+    <div id="wrapper">
+        <%= render "partials/topbar" %>
+
+		<%= render "partials/left_menu" %>
+        
+	    <!-- Left Sidebar End -->
+	    <div class="content-page">
+		  	<!-- Start content -->
+		  	<div class="content">
+		   		<div class="container">
+					<%= yield %>
+				</div>
+			</div>
+		</div>
+	</div>
+    <%= yield(:additional_script) if content_for?(:additional_script) %>
+</body>
+</html>

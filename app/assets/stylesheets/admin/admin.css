@@ -1,0 +1,31 @@
+.video-item {
+  float: left;
+  width: 25%;
+  padding: 10px;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  overflow: hidden;
+}
+.video-item:hover .link-video span {
+  bottom: 0;
+}
+.link-video {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+.link-video span {
+  bottom: -100%;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.78);
+  padding: 10px;
+  width: 100%;
+  color: white;
+}
+.link-video span:hover {
+  text-decoration: underline;
+}
+.video-item img {
+  width: 100%;
+}

@@ -1,0 +1,9 @@
+<div class="video-item">
+    <p>
+        <%= link_to video.href, class: "link-video", target: "_blank" do %>
+            <%= image_tag video.thumbnail %>
+            <span><%= video.title %></span>
+        <% end %>
+    </p>
+    <p>Views: <span><%= video.views %></span></p>
+</div>
