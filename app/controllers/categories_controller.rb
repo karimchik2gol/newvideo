@@ -9,7 +9,7 @@ class CategoriesController < ApplicationController
   end
 
   def parse_categories
-    CategoryJob.perform_later
+    Category.parse_categories
     redirect_to categories_path
   end
 
