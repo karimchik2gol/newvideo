@@ -30,6 +30,7 @@ gem 'bcrypt', '~> 3.1.7'
 gem 'dotenv-rails'
 
 # Background Proccessing
+gem 'launchy'
 gem 'sidekiq'
 gem 'redis'
 gem 'foreman'

@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     delete "/" => :destroy
   end
 
+  get "success" => "videos#success"
 
   root :to => "enter#login"
   # The priority is based upon order of creation: first created -> highest priority.

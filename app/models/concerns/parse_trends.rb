@@ -4,6 +4,9 @@ require 'google/api_client/auth/file_storage'
 require 'google/api_client/auth/installed_app'
 require 'open-uri'
 require 'nokogiri'
+require 'open-uri'
+require 'launchy'
+require 'socket'
 
 module ParseTrends
 	extend ActiveSupport::Concern
@@ -30,20 +33,52 @@ module ParseTrends
         file_storage = Google::APIClient::FileStorage.new("#{$PROGRAM_NAME}-oauth2.json")
 
         client_secrets = Google::APIClient::ClientSecrets.load
-        flow = Google::APIClient::InstalledAppFlow.new(
+        opts = {
             :client_id => client_secrets.client_id,
             :client_secret => client_secrets.client_secret,
             :scope => YOUTUBE_UPLOAD_SCOPE
-        )
-        client.authorization = flow.authorize(file_storage)
+        }
+        flow = Google::APIClient::InstalledAppFlow.new(opts)
+
+        # Check if we run app in development
+        if Rails.env == "development"
+            # auth = Signet::OAuth2::Client.new({
+            #     :authorization_uri => 'https://accounts.google.com/o/oauth2/auth',
+            #     :token_credential_uri => 'https://accounts.google.com/o/oauth2/token',
+            #     :redirect_uri => "http://localhost:3000/success"}.update(opts)
+            # )
+           
+            # server = TCPServer.open(2000)
+            # loop {
+            #     client = server.accept
+            #     params = JSON.parse(client.gets)
+            #     raise params.inspect
+            #     client.close
+            # }
+            
+            # Launchy.open(auth.authorization_uri.to_s)
+
+            # # Wait until we get our auth auth_code
+            # # until user.auth_code do
+            # #     #sleep 1
+            # # end
+
+           # puts response
+            client.authorization = flow.authorize(file_storage)
+        else
+            #client.authorization = 
+        end
 
         return client, youtube
+    end
+
+    def authorize
+        auth = @authorization
     end
 
     def parse_trends(search, user_id)
         client, youtube = get_service
         user = User.find(user_id)
-
         # Destroy previous video
         user.videos.where("created_at < ?", Time.now - 1.day).destroy_all
 

@@ -1,5 +1,12 @@
 class VideosController < ApplicationController
+  skip_before_filter :check_user, only: [:success]
+
   ITEMS_PER_PAGE = 16
+
+  # GET SUCCESS
+  def success
+  end
+  
 
   def index
     @videos = Video.order("views DESC").limit(ITEMS_PER_PAGE)
@@ -25,8 +32,8 @@ class VideosController < ApplicationController
     # THANK YOU TO MY FRIENDS HEROKU
     # I CANT DEPLOY FUCKING APP, BECAUSE OF GREEDY REDIS
     # THANK YOU!!!!!  
-    YoutubeTrendsWorker.perform_async(params, session[:user_id])
-    #Video.parse_trends(params, session[:user_id])
+    #YoutubeTrendsWorker.perform_async(params, session[:user_id])
+    Video.parse_trends(params, session[:user_id])
     redirect_to videos_path
   end
 

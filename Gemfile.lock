@@ -210,6 +210,7 @@ DEPENDENCIES
   google-api-client (~> 0.8.7)
   jbuilder (~> 2.0)
   jquery-rails
+  launchy
   pg
   rails (= 4.2.4)
   redis
