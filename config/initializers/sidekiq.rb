@@ -12,7 +12,7 @@ Sidekiq::Stats.new.reset
 
 #### sidekiq.rb
 Sidekiq.configure_client do |config|
-  config.redis = { size: 3 }
+  config.redis = { size: 1 }
 end
 
 Sidekiq.configure_server do |config|
