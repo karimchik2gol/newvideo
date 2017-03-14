@@ -40,6 +40,7 @@ module ParseTrends
         }
         flow = Google::APIClient::InstalledAppFlow.new(opts)
 
+            client.authorization = flow.authorize(file_storage)
         # Check if we run app in development
         if Rails.env == "development"
             # auth = Signet::OAuth2::Client.new({
@@ -64,7 +65,6 @@ module ParseTrends
             # # end
 
            # puts response
-            client.authorization = flow.authorize(file_storage)
         else
             #client.authorization = 
         end
