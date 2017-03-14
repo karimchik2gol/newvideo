@@ -26,7 +26,7 @@ class VideosController < ApplicationController
     # I CANT DEPLOY FUCKING APP, BECAUSE OF GREEDY REDIS
     # THANK YOU!!!!!  
     YoutubeTrendsWorker.perform_async(params, session[:user_id])
-    # Video.parse_trends(params, session[:user_id])
+    #Video.parse_trends(params, session[:user_id])
     redirect_to videos_path
   end
 

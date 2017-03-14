@@ -1,9 +1,9 @@
-require 'google/api_client'
-require 'google/api_client/client_secrets'
-require 'google/api_client/auth/file_storage'
-require 'google/api_client/auth/installed_app'
-require 'open-uri'
-require 'nokogiri'
+# require 'google/api_client'
+# require 'google/api_client/client_secrets'
+# require 'google/api_client/auth/file_storage'
+# require 'google/api_client/auth/installed_app'
+# require 'open-uri'
+# require 'nokogiri'
 
 module ParseTrends
 	extend ActiveSupport::Concern
@@ -40,7 +40,7 @@ module ParseTrends
     #     return client, youtube
     # end
 
-    # def parse_trends(search, user_id)
+    def parse_trends(search, user_id)
     #     client, youtube = get_service
     #     user = User.find(user_id)
 
@@ -75,7 +75,7 @@ module ParseTrends
     #     else
     #         send_query_to_api(client, youtube, parameters, user)
     #     end
-    # end
+    end
 
     # def send_query_to_api(client, youtube, parameters, user)
     #     # Send request to server
