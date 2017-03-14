@@ -1,3 +1,1 @@
-#### sidekiq.yml
-production:
-  :concurrency: 1
+:concurrency: 2
