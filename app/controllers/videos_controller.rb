@@ -31,7 +31,9 @@ class VideosController < ApplicationController
   end
 
   def parse_trends
-    @categories = current_user.my_category.list_categories
+    myCat = current_user.my_category
+    @categories = myCat ? myCat.list_categories : []
+    redirect_to videos_path
   end
 
   def destroy
