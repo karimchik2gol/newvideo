@@ -9,11 +9,3 @@ Sidekiq::ScheduledSet.new.clear
 # 3. Clear 'Processed' and 'Failed' jobs statistics (OPTIONAL)
 
 Sidekiq::Stats.new.reset
-
-Sidekiq.configure_client do |config|
-  config.redis = { :db => 1 }
-end
-
-Sidekiq.configure_server do |config|
-  config.redis = { :db => 1 }
-end
