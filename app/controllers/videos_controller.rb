@@ -22,8 +22,11 @@ class VideosController < ApplicationController
        current_user.build_my_category(list_categories: params[:category_ids].join(",")).save
     end
     
-    YoutubeTrendsWorker.perform_async(params, session[:user_id])
-    #Video.parse_trends(params, session[:user_id])
+    # THANK YOU TO MY FRIENDS HEROKU
+    # I CANT DEPLOY FUCKING APP, BECAUSE OF GREEDY REDIS
+    # THANK YOU!!!!!  
+    # YoutubeTrendsWorker.perform_async(params, session[:user_id])
+    Video.parse_trends(params, session[:user_id])
     redirect_to videos_path
   end
 
