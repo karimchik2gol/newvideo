@@ -11,9 +11,9 @@ Sidekiq::ScheduledSet.new.clear
 Sidekiq::Stats.new.reset
 
 Sidekiq.configure_client do |config|
-  config.redis = { :size => 1 }
+  config.redis = { :db => 1 }
 end
 
 Sidekiq.configure_server do |config|
-  config.redis = { :size => 4 }
+  config.redis = { :db => 1 }
 end
