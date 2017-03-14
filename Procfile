@@ -1,2 +1,2 @@
-worker: bundle exec sidekiq -c 3 -v
+worker: bundle exec sidekiq
 localhost: rails s
