@@ -9,13 +9,13 @@ class VideosController < ApplicationController
   
 
   def index
-    @videos = Video.order("views DESC").limit(ITEMS_PER_PAGE)
+    @videos = current_user.videos.order("views DESC").limit(ITEMS_PER_PAGE)
     @categories = current_user.videos.group_by(&:category_id).map { |f| Category.find_by_category_id(f[0]) }
     @videos = @videos.where(category_id: params[:category_id].to_i) if params[:category_id]
   end
 
   def newitems
-    @videos = Video.order("views DESC").offset(params[:page].to_i * ITEMS_PER_PAGE).limit(ITEMS_PER_PAGE)
+    @videos = current_user.videos.order("views DESC").offset(params[:page].to_i * ITEMS_PER_PAGE).limit(ITEMS_PER_PAGE)
     right = ITEMS_PER_PAGE - @videos.count > 0 ? false : true
     response.headers['permit_to_scroll'] = "#{right}"
     render partial: "video_list"
@@ -34,6 +34,7 @@ class VideosController < ApplicationController
     # THANK YOU!!!!!  
     #YoutubeTrendsWorker.perform_async(params, session[:user_id])
     Video.parse_trends(params, session[:user_id])
+    #Video.parse_trends(params, session[:user_id])
     redirect_to videos_path
   end
 

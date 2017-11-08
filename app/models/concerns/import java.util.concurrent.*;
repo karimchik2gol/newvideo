@@ -1,0 +1,175 @@
+import java.util.concurrent.*;
+import java.io.IOException;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+class Main {
+    public static int SIZE = 400; // Array size
+    public static int SPLITTER_COUNT = 5; // Count of splitted array
+
+    public static void waitUntilAllTasksIsDone(Future futureArray[]) {
+        for (int i = 0; i < SPLITTER_COUNT; i++) {
+            while (!futureArray[i].isDone()) {
+            }
+        }
+    }
+
+    public static int startIndex(int i) {
+        return SIZE / SPLITTER_COUNT * i;
+    }
+
+    public static int endIndex(int i) {
+        return i == SPLITTER_COUNT - 1 ? SIZE : SIZE / SPLITTER_COUNT * (i + 1);
+    }
+
+    public static int even(List<Integer> array, ExecutorService ex) {
+        Future<Integer> countOfEvenResults[] = new Future[SPLITTER_COUNT];
+        AtomicInteger countOfEvent = new AtomicInteger(0);
+
+        for(int i = 0; i < SPLITTER_COUNT; i++) {
+            countOfEvenResults[i] = ex.submit(new CallableCount(array, startIndex(i), endIndex(i), countOfEvent));
+        }
+
+        waitUntilAllTasksIsDone(countOfEvenResults);
+
+        try {
+            int count = 0;
+            for (int i = 0; i < SPLITTER_COUNT; i++) {
+                count += countOfEvenResults[i].get();
+            }
+            System.out.println("My even: " + count);
+
+        } catch (InterruptedException ie) {
+            ie.printStackTrace(System.err);
+        } catch (ExecutionException ee) {
+            ee.printStackTrace(System.err);
+        }
+
+        System.out.println("Atomic even: " + countOfEvent.get());
+
+        return 0;
+    }
+
+    public static int sum(List<Integer> array, ExecutorService ex) {
+        Future<Integer> sumResults[] = new Future[SPLITTER_COUNT];
+        AtomicInteger sumOfArray = new AtomicInteger(0);
+
+        for(int i = 0; i < SPLITTER_COUNT; i++) {
+            sumResults[i] = ex.submit(new CallableSum(array, startIndex(i), endIndex(i), sumOfArray));
+        }
+
+        waitUntilAllTasksIsDone(sumResults);
+
+        try {
+            int sum = 0;
+            for (int i = 0; i < SPLITTER_COUNT; i++) {
+                sum += sumResults[i].get();
+            }
+
+            System.out.println("My sum: " + sum);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace(System.err);
+        } catch (ExecutionException ee) {
+            ee.printStackTrace(System.err);
+        }
+
+        System.out.println("My atomic sum: " + sumOfArray.get());
+
+        return 0;
+    }
+
+    public static int xor(List<Integer> array, ExecutorService ex) {
+        Future<Integer> xorResults[] = new Future[SPLITTER_COUNT];
+        AtomicInteger xorResult = new AtomicInteger(0);
+
+        for(int i = 0; i < SPLITTER_COUNT; i++) {
+            xorResults[i] = ex.submit(new CallableXor(array, startIndex(i), endIndex(i),xorResult));
+        }
+
+        waitUntilAllTasksIsDone(xorResults);
+
+        try {
+            int xor = 0;
+            for (int i = 0; i < SPLITTER_COUNT; i++) {
+                xor ^= xorResults[i].get();
+            }
+
+            System.out.println("My xor: " + xor);
+
+        } catch (InterruptedException ie) {
+            ie.printStackTrace(System.err);
+        } catch (ExecutionException ee) {
+            ee.printStackTrace(System.err);
+        }
+
+        System.out.println("Atomic xor: " + xorResult.get());
+
+        return 0;
+    }
+
+    public static int minMax(List<Integer> array, ExecutorService ex) {
+        Future<FixMinimumAndMaximum[]> minMaxRes[] = new Future[SPLITTER_COUNT];
+        FixMinimumAndMaximum ob = new FixMinimumAndMaximum();
+        // Pass name, value and index
+        AtomicReference<FixMinimumAndMaximum> minAtomic = new AtomicReference<>(new FixMinimumAndMaximum("Min", array.get(0), 0));
+        AtomicReference<FixMinimumAndMaximum> maxAtomic = new AtomicReference<>(new FixMinimumAndMaximum("Max", array.get(0), 0));
+
+        // Calculate Min and Max
+        for(int i = 0; i < SPLITTER_COUNT; i++) {
+            minMaxRes[i] = ex.submit(new CallableMinMax(array, startIndex(i), endIndex(i), minAtomic, maxAtomic));
+        }
+
+        waitUntilAllTasksIsDone(minMaxRes);
+
+        try {
+            int min = minMaxRes[0].get()[0].getIndex();
+            int max = minMaxRes[0].get()[1].getIndex();
+
+            for (int i = 1; i < SPLITTER_COUNT; i++) {
+                if (array.get(min) > array.get(minMaxRes[i].get()[0].getIndex())) {
+                    min = minMaxRes[i].get()[0].getIndex();
+                }
+                ;
+                if (array.get(max) < array.get(minMaxRes[i].get()[1].getIndex())) {
+                    max = minMaxRes[i].get()[1].getIndex();
+                }
+            }
+
+            System.out.println("Min value = " + array.get(min) + ", index = " + min);
+            System.out.println("Max value = " + array.get(max) + ", index = " + max);
+        } catch (InterruptedException ie) {
+            ie.printStackTrace(System.err);
+        } catch (ExecutionException ee) {
+            ee.printStackTrace(System.err);
+        }
+
+        System.out.println("Min by Atomic: " + minAtomic.get().getVal() + ", index: " +
+                minAtomic.get().getIndex());
+        System.out.println("Max by Atomic: " + maxAtomic.get().getVal() + ", index: " +
+                maxAtomic.get().getIndex());
+
+        return 0;
+    }
+
+
+    public static void main(String[] args) {
+        List<Integer> array = new ArrayList<Integer>();
+        for(int i = 0; i < SIZE; i++) {
+            array.add(i, i);
+        }
+
+        ExecutorService es1 = Executors.newFixedThreadPool(5);
+
+        even(array, es1);
+        sum(array, es1);
+        xor(array, es1);
+        minMax(array, es1);
+
+        System.out.println();
+
+        es1.shutdown();
+    }
+}
